@@ -40,7 +40,7 @@ body {
     display: grid;
     grid-template: 
                    "seven eight nine undo all-clear" auto
-                   "four five six plus minus" auto
+                   "four five six add subtract" auto
                    "one two three multiply divide" auto
                    "zero decimal-point sign-modifier equals-sign equals-sign" auto
                    / auto auto auto auto auto;
@@ -129,11 +129,11 @@ body {
 .all-clear {
     grid-area: all-clear;
 }
-.plus {
-    grid-area: plus;
+.add {
+    grid-area: add;
 }
-.minus {
-    grid-area: minus;
+.subtract {
+    grid-area: subtract;
 }
 .multiply {
     grid-area: multiply;
