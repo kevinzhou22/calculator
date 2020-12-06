@@ -55,6 +55,7 @@ body {
     height: 6rem;
     width: 6rem;
     transition: filter 0.1s, transform 0.1s;
+    transition-timing-function: ease-out;
     user-select: none;
 }
 
