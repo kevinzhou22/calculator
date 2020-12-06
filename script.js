@@ -1,8 +1,3 @@
-
-
-
-
-
 function operate(operator, a , b) {
     switch (operator) {
         case "+":
