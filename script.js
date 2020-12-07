@@ -3,7 +3,7 @@
 const display = document.querySelector(".display");
 
 let firstArgument = null;
-let secondArgument = null;
+let secondArgument = 0;
 let currentOperation = "";
 
 const ADD_OPERATOR = "add";
@@ -35,19 +35,24 @@ const operatorButtons =document.querySelectorAll(".operator");
 operatorButtons.forEach((button)=> button.addEventListener("click",enterOperator))
 const equalsSignButton = document.querySelector(".equals-sign");
 equalsSignButton.addEventListener("click",enterEqualsSign);
+const signModifierButton = document.querySelector(".sign-modifier");
+signModifierButton.addEventListener("click", enterSignModifier);
+const decimalPointButton = document.querySelector(".decimal-point");
+decimalPointButton.addEventListener("click", enterDecimalPoint);
+const backspaceButton = document.querySelector(".backspace");
+backspaceButton.addEventListener("click", enterBackspace);
+const allClearButton = document.querySelector(".all-clear");
+allClearButton.addEventListener("click", enterAllClear);
+
+
 /* 
 Callback function to update the display when a number button is clicked */
 function enterNumber(e) {
     let displayNumber; 
-    if (secondArgument === null) {
-        displayNumber = e.currentTarget.value;
-    } else {
-        if(display.textContent.replace(".","").length >= MAXIMUM_LENGTH) return;
-        displayNumber = String(secondArgument) + e.currentTarget.value
-    }
-
-    secondArgument = +displayNumber;
-    display.textContent = secondArgument;
+    if(display.textContent.replace(".","").length >= MAXIMUM_LENGTH) return;
+    displayNumber = secondArgument === null ? e.currentTarget.value : secondArgument + e.currentTarget.value;
+    secondArgument = displayNumber;
+    display.textContent = String(+secondArgument);
 }
 
 /* Callback function to handle operator buttons being clicked */
@@ -57,7 +62,7 @@ function enterOperator(e) {
         currentOperation = determineOperator(e.currentTarget);
         secondArgument = null;
     } else {
-        firstArgument = operate(currentOperation,firstArgument,secondArgument);
+        firstArgument = operate(currentOperation, +firstArgument, +secondArgument);
         secondArgument = null;
         currentOperation = determineOperator(e.currentTarget);
         display.textContent = firstArgument;
@@ -66,11 +71,51 @@ function enterOperator(e) {
 
 /* Callback function to handle equals sign being clicked */
 function enterEqualsSign(e) {
-    firstArgument = operate(currentOperation,firstArgument,secondArgument);
+    firstArgument = operate(currentOperation,+firstArgument,+secondArgument);
     secondArgument = null;
     currentOperation = "";
     display.textContent = firstArgument;
 }
+
+/* callback function to handle signs modifier button being clicked */
+function enterSignModifier(e) {
+    if(secondArgument.slice(0,1) = "-") {
+        secondArgument = secondArgument.slice(1);
+    } else {
+        secondArgument = "-" + secondArgument;
+    }
+    
+    display.textContent = secondArgument;
+}
+
+/* callback function to handle decimal point button being clicked */
+function enterDecimalPoint(e) {
+    if (secondArgument === null) {
+        secondArgument = "0."
+    }
+    if(!secondArgument.includes(".")) {
+        secondArgument += ".";
+    }
+    
+    display.textContent = secondArgument;
+}
+
+/* callback function to handle backspace button being clicked */
+function enterBackspace(e) {
+    if (secondArgument === null || secondArgument === "0") return;
+    secondArgument = secondArgument.slice(0,secondArgument.length-1);
+    display.textContent = secondArgument;
+}
+
+
+/* callback function to handle all clear button being clicked */
+function enterAllClear(e) {
+    firstArgument = null;
+    secondArgument = 0;
+    display.textContent = secondArgument;
+    currentOperator = "";
+}
+
 
 /* Takes one argument representing a button node and determines which operator it represents. */
 function determineOperator(button) {
