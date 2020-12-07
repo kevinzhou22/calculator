@@ -10,7 +10,7 @@ const ADD_OPERATOR = "add";
 const SUBSTRACT_OPERATOR = "substract";
 const DIVIDE_OPERATOR = "divide";
 const MULTIPLY_OPERATOR = "multiply";
-
+const MAXIMUM_LENGTH = 11;
 
 
 /* Adds the focus outline effect if the user starts using tab */
@@ -42,6 +42,7 @@ function enterNumber(e) {
     if (secondArgument === null) {
         displayNumber = e.currentTarget.value;
     } else {
+        if(display.textContent.replace(".","").length >= MAXIMUM_LENGTH) return;
         displayNumber = String(secondArgument) + e.currentTarget.value
     }
 
@@ -90,22 +91,73 @@ function determineOperator(button) {
     }
 }
 
+/* takes a number and returns a string representing the number, rounded to fit the screen size. */
+function shrinkNumber(number) {
+    let returnStringNumber;
+    const isNegative = number < 0;
+    let stringNumber = isNegative ? number.toString().slice(1) : number.toString();
+
+    if (stringNumber.includes("e")) {
+        return (isNegative ? "-" : "") + roundNumberWithScientificNotation(stringNumber);
+    }
+    
+    const containsDecimal = stringNumber.includes(".");
+    if (stringNumber.replace(".","").length <= MAXIMUM_LENGTH) {
+        returnStringNumber = stringNumber;
+    }
+
+    const integerPortionOfStringNumber = containsDecimal ? stringNumber.slice(0,stringNumber.indexOf(".")) : stringNumber;
+
+    if(integerPortionOfStringNumber.length > MAXIMUM_LENGTH) {
+        let powerTen = "e+" + (integerPortionOfStringNumber.length - 1);
+        let roundedIntegerPortion = roundNumber(+integerPortionOfStringNumber, 
+            -(integerPortionOfStringNumber.length - MAXIMUM_LENGTH + powerTen.length)).toString();
+        returnStringNumber = +(roundedIntegerPortion.slice(0,1) + "." + roundedIntegerPortion.slice(1)).toString() + powerTen;
+    } else if (stringNumber.replace(".","").length > MAXIMUM_LENGTH) {
+        returnStringNumber = roundNumber(+stringNumber,MAXIMUM_LENGTH - integerPortionOfStringNumber.length).toString();
+    }
+
+   /* browser automatically formats numbers that are < 1e-6 into scientific notation. As such, small numbers are handled by the above code
+   that deals with numbers written in scientific notation
+   */
+    
+    return (isNegative ? "-" + returnStringNumber : returnStringNumber);
+}
 
 
-/* takes an operator and two numbers. Returns the outcome of the operation using the two numbers */
+/* rounds the non-exponent part of a number represented as a string in scientific notation */
+function roundNumberWithScientificNotation(stringNumber) {
+    let numberPortion = stringNumber.slice(0,stringNumber.indexOf("e"));
+    let exponentPortion = stringNumber.slice(stringNumber.indexOf("e"));
+    return roundNumber(numberPortion,MAXIMUM_LENGTH - 1 - exponentPortion.length) + exponentPortion;
+}
+
+/* rounds a number to a given decimal place. Zero / negative decimal places start rounding integer digits (e.g., -1 rounds to the nearest ten) */
+function roundNumber(number, decimalPlace) {
+    if (decimalPlace > 0) {
+        return +((Math.round(number + "e+" + decimalPlace)) + "e-" + decimalPlace);
+    } else if (decimalPlace < 0) {
+        return +((Math.round(number + "e" + (decimalPlace))) + "e+" + -(decimalPlace));
+    } else {
+        return number;   
+    }
+    
+}
+
+/* takes an operator and two numbers. Returns the outcome of the operation using the two numbers, shrunk to fit the screen size. */
 function operate(operator, a, b) {
     switch (operator) {
         case ADD_OPERATOR:
-            return add(a, b);
+            return shrinkNumber(add(a, b));
             break;
         case SUBSTRACT_OPERATOR:
-            return subtract(a, b);
+            return shrinkNumber(subtract(a, b));
             break;
         case MULTIPLY_OPERATOR:
-            return multiply(a, b);
+            return shrinkNumber(multiply(a, b));
             break;
         case DIVIDE_OPERATOR:
-            return divide(a, b);
+            return shrinkNumber(divide(a, b));
             break;
     }
 }
