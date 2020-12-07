@@ -6,6 +6,9 @@ let firstArgument = null;
 let secondArgument = 0;
 let currentOperation = "";
 
+// represents whether the calcualtor display is showing the results of a previosu calculation
+let inDisplayMode = false;
+
 const ADD_OPERATOR = "add";
 const SUBSTRACT_OPERATOR = "substract";
 const DIVIDE_OPERATOR = "divide";
@@ -31,10 +34,10 @@ buttons.forEach((button) => {
 
 const numberButtons = document.querySelectorAll(".number");
 numberButtons.forEach((button) => button.addEventListener("click", enterNumber));
-const operatorButtons =document.querySelectorAll(".operator");
-operatorButtons.forEach((button)=> button.addEventListener("click",enterOperator))
+const operatorButtons = document.querySelectorAll(".operator");
+operatorButtons.forEach((button) => button.addEventListener("click", enterOperator))
 const equalsSignButton = document.querySelector(".equals-sign");
-equalsSignButton.addEventListener("click",enterEqualsSign);
+equalsSignButton.addEventListener("click", enterEqualsSign);
 const signModifierButton = document.querySelector(".sign-modifier");
 signModifierButton.addEventListener("click", enterSignModifier);
 const decimalPointButton = document.querySelector(".decimal-point");
@@ -48,62 +51,79 @@ allClearButton.addEventListener("click", enterAllClear);
 /* 
 Callback function to update the display when a number button is clicked */
 function enterNumber(e) {
-    let displayNumber; 
-    if(display.textContent.replace(".","").length >= MAXIMUM_LENGTH) return;
-    displayNumber = secondArgument === null ? e.currentTarget.value : secondArgument + e.currentTarget.value;
+    let displayNumber;
+    if (display.textContent.replace(".", "").length >= MAXIMUM_LENGTH) return;
+    displayNumber = (secondArgument === null || secondArgument === 0) ? e.currentTarget.value : secondArgument + e.currentTarget.value;
     secondArgument = displayNumber;
     display.textContent = String(+secondArgument);
+    inDisplayMode = false;
 }
 
 /* Callback function to handle operator buttons being clicked */
 function enterOperator(e) {
-    if (firstArgument === null) {
+    if (inDisplayMode) {
+        currentOperation = determineOperator(e.currentTarget);
+    } else if (firstArgument === null) {
         firstArgument = secondArgument;
         currentOperation = determineOperator(e.currentTarget);
         secondArgument = null;
+        inDisplayMode = true;
     } else {
         firstArgument = operate(currentOperation, +firstArgument, +secondArgument);
         secondArgument = null;
         currentOperation = determineOperator(e.currentTarget);
         display.textContent = firstArgument;
+        inDisplayMode = true;
     }
 }
 
 /* Callback function to handle equals sign being clicked */
 function enterEqualsSign(e) {
-    firstArgument = operate(currentOperation,+firstArgument,+secondArgument);
-    secondArgument = null;
-    currentOperation = "";
-    display.textContent = firstArgument;
+    if (inDisplayMode) {
+        firstArgument = operate(currentOperation,+firstArgument,+firstArgument);
+        display.textContent = firstArgument;
+    } else if (firstArgument === null) {
+        secondArgument = 0;
+        display.textContent = secondArgument;
+    } else {
+        firstArgument = operate(currentOperation, +firstArgument, +secondArgument);
+        secondArgument = null;
+        display.textContent = firstArgument;
+        inDisplayMode = true;
+    }
 }
 
 /* callback function to handle signs modifier button being clicked */
 function enterSignModifier(e) {
-    if(secondArgument.slice(0,1) = "-") {
+    if(inDisplayMode) return;
+    if (secondArgument.slice(0, 1) = "-") {
         secondArgument = secondArgument.slice(1);
     } else {
         secondArgument = "-" + secondArgument;
     }
-    
+
     display.textContent = secondArgument;
 }
 
 /* callback function to handle decimal point button being clicked */
 function enterDecimalPoint(e) {
+    if(inDisplayMode) return;
     if (secondArgument === null) {
         secondArgument = "0."
     }
-    if(!secondArgument.includes(".")) {
+    if (!secondArgument.includes(".")) {
         secondArgument += ".";
     }
-    
+
     display.textContent = secondArgument;
 }
 
 /* callback function to handle backspace button being clicked */
 function enterBackspace(e) {
+    if(inDisplayMode) return;
     if (secondArgument === null || secondArgument === "0") return;
-    secondArgument = secondArgument.slice(0,secondArgument.length-1);
+    secondArgument = secondArgument.slice(0, secondArgument.length - 1);
+    if (secondArgument === "") secondArgument = "0";
     display.textContent = secondArgument;
 }
 
@@ -145,36 +165,36 @@ function shrinkNumber(number) {
     if (stringNumber.includes("e")) {
         return (isNegative ? "-" : "") + roundNumberWithScientificNotation(stringNumber);
     }
-    
+
     const containsDecimal = stringNumber.includes(".");
-    if (stringNumber.replace(".","").length <= MAXIMUM_LENGTH) {
+    if (stringNumber.replace(".", "").length <= MAXIMUM_LENGTH) {
         returnStringNumber = stringNumber;
     }
 
-    const integerPortionOfStringNumber = containsDecimal ? stringNumber.slice(0,stringNumber.indexOf(".")) : stringNumber;
+    const integerPortionOfStringNumber = containsDecimal ? stringNumber.slice(0, stringNumber.indexOf(".")) : stringNumber;
 
-    if(integerPortionOfStringNumber.length > MAXIMUM_LENGTH) {
+    if (integerPortionOfStringNumber.length > MAXIMUM_LENGTH) {
         let powerTen = "e+" + (integerPortionOfStringNumber.length - 1);
-        let roundedIntegerPortion = roundNumber(+integerPortionOfStringNumber, 
+        let roundedIntegerPortion = roundNumber(+integerPortionOfStringNumber,
             -(integerPortionOfStringNumber.length - MAXIMUM_LENGTH + powerTen.length)).toString();
-        returnStringNumber = +(roundedIntegerPortion.slice(0,1) + "." + roundedIntegerPortion.slice(1)).toString() + powerTen;
-    } else if (stringNumber.replace(".","").length > MAXIMUM_LENGTH) {
-        returnStringNumber = roundNumber(+stringNumber,MAXIMUM_LENGTH - integerPortionOfStringNumber.length).toString();
+        returnStringNumber = +(roundedIntegerPortion.slice(0, 1) + "." + roundedIntegerPortion.slice(1)).toString() + powerTen;
+    } else if (stringNumber.replace(".", "").length > MAXIMUM_LENGTH) {
+        returnStringNumber = roundNumber(+stringNumber, MAXIMUM_LENGTH - integerPortionOfStringNumber.length).toString();
     }
 
-   /* browser automatically formats numbers that are < 1e-6 into scientific notation. As such, small numbers are handled by the above code
-   that deals with numbers written in scientific notation
-   */
-    
+    /* browser automatically formats numbers that are < 1e-6 into scientific notation. As such, small numbers are handled by the above code
+    that deals with numbers written in scientific notation
+    */
+
     return (isNegative ? "-" + returnStringNumber : returnStringNumber);
 }
 
 
 /* rounds the non-exponent part of a number represented as a string in scientific notation */
 function roundNumberWithScientificNotation(stringNumber) {
-    let numberPortion = stringNumber.slice(0,stringNumber.indexOf("e"));
+    let numberPortion = stringNumber.slice(0, stringNumber.indexOf("e"));
     let exponentPortion = stringNumber.slice(stringNumber.indexOf("e"));
-    return roundNumber(numberPortion,MAXIMUM_LENGTH - 1 - exponentPortion.length) + exponentPortion;
+    return roundNumber(numberPortion, MAXIMUM_LENGTH - 1 - exponentPortion.length) + exponentPortion;
 }
 
 /* rounds a number to a given decimal place. Zero / negative decimal places start rounding integer digits (e.g., -1 rounds to the nearest ten) */
@@ -184,9 +204,8 @@ function roundNumber(number, decimalPlace) {
     } else if (decimalPlace < 0) {
         return +((Math.round(number + "e" + (decimalPlace))) + "e+" + -(decimalPlace));
     } else {
-        return number;   
+        return number;
     }
-    
 }
 
 /* takes an operator and two numbers. Returns the outcome of the operation using the two numbers, shrunk to fit the screen size. */
@@ -206,9 +225,6 @@ function operate(operator, a, b) {
             break;
     }
 }
-
-
-
 
 function add(a, b) {
     return a + b;
