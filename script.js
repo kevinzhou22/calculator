@@ -67,6 +67,10 @@ function enterOperator(e) {
         firstArgument = secondArgument;
         currentOperation = determineOperator(e.currentTarget);
         secondArgument = null;
+        display.TextContent = "Error";
+        inDisplayMode = true;
+    } else if(firstArgument === "Error") {
+        secondArgument = null;
         inDisplayMode = true;
     } else {
         firstArgument = operate(currentOperation, +firstArgument, +secondArgument);
@@ -85,7 +89,11 @@ function enterEqualsSign(e) {
     } else if (firstArgument === null) {
         secondArgument = 0;
         display.textContent = secondArgument;
-    } else {
+    } else if (firstArgument === "Error") {
+        secondArgument = null;
+        display.textContent = "Error";
+        inDisplayMode = true;
+    } else{
         firstArgument = operate(currentOperation, +firstArgument, +secondArgument);
         secondArgument = null;
         display.textContent = firstArgument;
@@ -96,7 +104,7 @@ function enterEqualsSign(e) {
 /* callback function to handle signs modifier button being clicked */
 function enterSignModifier(e) {
     if(inDisplayMode) return;
-    if (secondArgument.slice(0, 1) = "-") {
+    if (secondArgument.slice(0, 1) === "-") {
         secondArgument = secondArgument.slice(1);
     } else {
         secondArgument = "-" + secondArgument;
@@ -221,6 +229,9 @@ function operate(operator, a, b) {
             return shrinkNumber(multiply(a, b));
             break;
         case DIVIDE_OPERATOR:
+            if (b === 0) {
+                return "Error";
+            }
             return shrinkNumber(divide(a, b));
             break;
     }
