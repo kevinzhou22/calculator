@@ -3,7 +3,7 @@
 const display = document.querySelector(".display");
 
 let firstArgument = null;
-let secondArgument = 0;
+let secondArgument = "0";
 let currentOperation = "";
 
 // represents whether the calcualtor display is showing the results of a previosu calculation
@@ -13,7 +13,7 @@ const ADD_OPERATOR = "add";
 const SUBSTRACT_OPERATOR = "substract";
 const DIVIDE_OPERATOR = "divide";
 const MULTIPLY_OPERATOR = "multiply";
-const MAXIMUM_LENGTH = 11;
+const MAXIMUM_LENGTH = 10;
 
 
 /* Adds the focus outline effect if the user starts using tab */
@@ -52,8 +52,9 @@ allClearButton.addEventListener("click", enterAllClear);
 Callback function to update the display when a number button is clicked */
 function enterNumber(e) {
     let displayNumber;
-    if (display.textContent.replace(".", "").length >= MAXIMUM_LENGTH) return;
-    displayNumber = (secondArgument === null || secondArgument === 0) ? e.currentTarget.value : secondArgument + e.currentTarget.value;
+    if (secondArgument !== null && secondArgument.replace(".", "").length >= MAXIMUM_LENGTH) return;
+    if (secondArgument !== null && secondArgument.slice(secondArgument.indexOf(".")).length > 1) return;
+    displayNumber = (secondArgument === null || secondArgument === "0") ? e.currentTarget.value : secondArgument + e.currentTarget.value;
     secondArgument = displayNumber;
     display.textContent = String(+secondArgument);
     inDisplayMode = false;
@@ -93,7 +94,7 @@ function enterEqualsSign(e) {
         secondArgument = null;
         display.textContent = "Error";
         inDisplayMode = true;
-    } else{
+    } else {
         firstArgument = operate(currentOperation, +firstArgument, +secondArgument);
         secondArgument = null;
         display.textContent = firstArgument;
@@ -103,7 +104,9 @@ function enterEqualsSign(e) {
 
 /* callback function to handle signs modifier button being clicked */
 function enterSignModifier(e) {
-    if(inDisplayMode) return;
+    if(inDisplayMode) {
+       return
+    }
     if (secondArgument.slice(0, 1) === "-") {
         secondArgument = secondArgument.slice(1);
     } else {
@@ -139,7 +142,7 @@ function enterBackspace(e) {
 /* callback function to handle all clear button being clicked */
 function enterAllClear(e) {
     firstArgument = null;
-    secondArgument = 0;
+    secondArgument = "0";
     display.textContent = secondArgument;
     currentOperator = "";
 }
