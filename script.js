@@ -47,6 +47,13 @@ backspaceButton.addEventListener("click", enterBackspace);
 const allClearButton = document.querySelector(".all-clear");
 allClearButton.addEventListener("click", enterAllClear);
 
+document.body.addEventListener("keydown", (e) => {
+    let button = document.querySelector(`button[data-key="${e.key}"]`);
+    if (button === null) return;
+    button.click();
+});
+
+
 
 /* 
 Callback function to update the display when a number button is clicked */
