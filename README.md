@@ -1,1 +1,3 @@
-# calculator
+This mini-project was primarily meant as a means for JavaScript practice. All in all, it was fairly straightforward, but it became fairly clear to me about halfway through that I needed to have planned more at the beginning before coding. While it all came together at the end, it often felt rather ad hoc as I often had to rewrite code to address certain concerns that would have been clear to me if I had thought about it a bit more at the beginning. Moreover, I have a feeling that there would have been fewer lines of code had I planned more at the start. A lesson for next time.
+
+Lastly, I have concerns about the accuracy of the calculator for very small / large numbers, but the mini-project was really just to get more practice in, so that issue was not addressed.
