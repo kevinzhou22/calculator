@@ -95,7 +95,7 @@ function enterEqualsSign(e) {
         firstArgument = operate(currentOperation,+firstArgument,+firstArgument);
         display.textContent = firstArgument;
     } else if (firstArgument === null) {
-        secondArgument = 0;
+        secondArgument = "0";
         display.textContent = secondArgument;
     } else if (firstArgument === "Error") {
         secondArgument = null;
